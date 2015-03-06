@@ -8,26 +8,37 @@
 #include "Language.h"
 #include "Config.h"
 
+std::string PLAYER_H_ICON;
 std::string PLAYER_H_PREFIX;
 std::string PLAYER_H_SUFFIX;
+std::string PLAYER_A_ICON;
 std::string PLAYER_A_PREFIX;
 std::string PLAYER_A_SUFFIX;
+std::string BUILDER_ICON;
 std::string BUILDER_PREFIX;
 std::string BUILDER_SUFFIX;
+std::string ARCHITECT_ICON;
 std::string ARCHITECT_PREFIX;
 std::string ARCHITECT_SUFFIX;
+std::string DUNGEONMASTER_ICON;
 std::string DUNGEONMASTER_PREFIX;
 std::string DUNGEONMASTER_SUFFIX;
+std::string EVENTMASTER_ICON;
 std::string EVENTMASTER_PREFIX;
 std::string EVENTMASTER_SUFFIX;
+std::string LOREMASTER_ICON;
 std::string LOREMASTER_PREFIX;
 std::string LOREMASTER_SUFFIX;
+std::string COMMUNITYREPRESENTATIVE_ICON;
 std::string COMMUNITYREPRESENTATIVE_PREFIX;
 std::string COMMUNITYREPRESENTATIVE_SUFFIX;
+std::string COMMUNITYMANAGER_ICON;
 std::string COMMUNITYMANAGER_PREFIX;
 std::string COMMUNITYMANAGER_SUFFIX;
+std::string COUNCILMEMBER_ICON;
 std::string COUNCILMEMBER_PREFIX;
 std::string COUNCILMEMBER_SUFFIX;
+std::string HEADDEVELOPER_ICON;
 std::string HEADDEVELOPER_PREFIX;
 std::string HEADDEVELOPER_SUFFIX;
 
@@ -89,58 +100,69 @@ public:
 		case SEC_PLAYER:
 			if (player->GetTeam() == ALLIANCE)
 			{
+				msg += PLAYER_H_ICON;
 				msg += PLAYER_H_PREFIX;
 				msg += nameLink;
 				msg += PLAYER_H_SUFFIX;
 			}
 			else
 			{
+				msg += PLAYER_A_ICON;
 				msg += PLAYER_A_PREFIX;
 				msg += nameLink;
 				msg += PLAYER_A_SUFFIX;
 			}
 			break;
 		case SEC_MODERATOR:
+			msg += BUILDER_ICON;
 			msg += BUILDER_PREFIX;
 			msg += nameLink;
 			msg += BUILDER_SUFFIX;
 			break;
 		case SEC_GAMEMASTER:
+			msg += DUNGEONMASTER_ICON;
 			msg += DUNGEONMASTER_PREFIX;
 			msg += nameLink;
 			msg += DUNGEONMASTER_SUFFIX;
 			break;
 		case SEC_ADMINISTRATOR:
+			msg += ARCHITECT_ICON;
 			msg += ARCHITECT_PREFIX;
 			msg += nameLink;
 			msg += ARCHITECT_SUFFIX;
 			break;
 		case SEC_EVENTMASTER:
+			msg += EVENTMASTER_ICON;
 			msg += EVENTMASTER_PREFIX;
 			msg += nameLink;
 			msg += EVENTMASTER_SUFFIX;
 			break;
 		case SEC_LOREMASTER:
+			msg += LOREMASTER_ICON;
 			msg += LOREMASTER_PREFIX;
 			msg += nameLink;
 			msg += LOREMASTER_SUFFIX;
 			break;
 		case SEC_COMMUNITYREPRESENTATIVE:
+			msg += COMMUNITYREPRESENTATIVE_ICON;
 			msg += COMMUNITYREPRESENTATIVE_PREFIX;
 			msg += nameLink;
 			msg += COMMUNITYREPRESENTATIVE_SUFFIX;
 			break;
 		case SEC_STAFFMEMBER:
+			msg += COMMUNITYMANAGER_ICON;
 			msg += COMMUNITYMANAGER_PREFIX;
 			msg += nameLink;
 			msg += COMMUNITYMANAGER_SUFFIX;
 			break;
 		case SEC_COUNCILMEMBER:
+			msg += COUNCILMEMBER_ICON;
 			msg += COUNCILMEMBER_PREFIX;
 			msg += nameLink;
 			msg += COUNCILMEMBER_SUFFIX;
 			break;
 		case SEC_HEADDEVELOPER:
+			msg += HEADDEVELOPER_ICON;
 			msg += HEADDEVELOPER_PREFIX;
 			msg += nameLink;
 			msg += HEADDEVELOPER_SUFFIX;
@@ -239,36 +261,47 @@ public:
 
 	void OnConfigLoad(bool /*reload*/)
 	{
+		PLAYER_H_ICON = sConfigMgr->GetStringDefault("PLAYER_H_ICON", "");
 		PLAYER_H_PREFIX = sConfigMgr->GetStringDefault("PLAYER_H_PREFIX", "");
 		PLAYER_H_SUFFIX = sConfigMgr->GetStringDefault("PLAYER_H_SUFFIX", "");
 
+		PLAYER_A_ICON = sConfigMgr->GetStringDefault("PLAYER_A_ICON", "");
 		PLAYER_A_PREFIX = sConfigMgr->GetStringDefault("PLAYER_A_PREFIX", "");
 		PLAYER_A_SUFFIX = sConfigMgr->GetStringDefault("PLAYER_A_SUFFIX", "");
 
+		BUILDER_ICON = sConfigMgr->GetStringDefault("BUILDER_ICON", "");
 		BUILDER_PREFIX = sConfigMgr->GetStringDefault("BUILDER_PREFIX", "");
 		BUILDER_SUFFIX = sConfigMgr->GetStringDefault("BUILDER_SUFFIX", "");
 
+		DUNGEONMASTER_ICON = sConfigMgr->GetStringDefault("DUNGEONMASTER_ICON", "");
 		DUNGEONMASTER_PREFIX = sConfigMgr->GetStringDefault("DUNGEONMASTER_PREFIX", "");
 		DUNGEONMASTER_SUFFIX = sConfigMgr->GetStringDefault("DUNGEONMASTER_SUFFIX", "");
 
+		ARCHITECT_ICON = sConfigMgr->GetStringDefault("ARCHITECT_ICON", "");
 		ARCHITECT_PREFIX = sConfigMgr->GetStringDefault("ARCHITECT_PREFIX", "");
 		ARCHITECT_SUFFIX = sConfigMgr->GetStringDefault("ARCHITECT_SUFFIX", "");
 
+		EVENTMASTER_ICON = sConfigMgr->GetStringDefault("EVENTMASTER_ICON", "");
 		EVENTMASTER_PREFIX = sConfigMgr->GetStringDefault("EVENTMASTER_PREFIX", "");
 		EVENTMASTER_SUFFIX = sConfigMgr->GetStringDefault("EVENTMASTER_SUFFIX", "");
 
+		LOREMASTER_ICON = sConfigMgr->GetStringDefault("LOREMASTER_ICON", "");
 		LOREMASTER_PREFIX = sConfigMgr->GetStringDefault("LOREMASTER_PREFIX", "");
 		LOREMASTER_SUFFIX = sConfigMgr->GetStringDefault("LOREMASTER_SUFFIX", "");
 
+		COMMUNITYREPRESENTATIVE_ICON = sConfigMgr->GetStringDefault("COMMUNITYREPRESENTATIVE_ICON", "");
 		COMMUNITYREPRESENTATIVE_PREFIX = sConfigMgr->GetStringDefault("COMMUNITYREPRESENTATIVE_PREFIX", "");
 		COMMUNITYREPRESENTATIVE_SUFFIX = sConfigMgr->GetStringDefault("COMMUNITYREPRESENTATIVE_SUFFIX", "");
 
+		COMMUNITYMANAGER_ICON = sConfigMgr->GetStringDefault("COMMUNITYMANAGER_ICON", "");
 		COMMUNITYMANAGER_PREFIX = sConfigMgr->GetStringDefault("COMMUNITYMANAGER_PREFIX", "");
 		COMMUNITYMANAGER_SUFFIX = sConfigMgr->GetStringDefault("COMMUNITYMANAGER_SUFFIX", "");
 
+		COUNCILMEMBER_ICON = sConfigMgr->GetStringDefault("COUNCILMEMBER_ICON", "");
 		COUNCILMEMBER_PREFIX = sConfigMgr->GetStringDefault("COUNCILMEMBER_PREFIX", "");
 		COUNCILMEMBER_SUFFIX = sConfigMgr->GetStringDefault("COUNCILMEMBER_SUFFIX", "");
 
+		HEADDEVELOPER_ICON = sConfigMgr->GetStringDefault("HEADDEVELOPER_ICON", "");
 		HEADDEVELOPER_PREFIX = sConfigMgr->GetStringDefault("HEADDEVELOPER_PREFIX", "");
 		HEADDEVELOPER_SUFFIX = sConfigMgr->GetStringDefault("HEADDEVELOPER_SUFFIX", "");
 
