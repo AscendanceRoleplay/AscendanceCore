@@ -298,7 +298,7 @@ public:
 
 		bool isAdmin;
 
-		QueryResult result = LoginDatabase.PQuery("SELECT COUNT(*) FROM account_access WHERE id = '%u' AND gmlevel >= 1", _player->GetGUID());
+		QueryResult result = LoginDatabase.PQuery("SELECT COUNT(*) FROM account_access WHERE id = '%u' AND gmlevel >= 3", _player->GetGUID());
 		Field * fields = result->Fetch();
 
 		if (fields[0].GetInt32() >= 1)
@@ -311,8 +311,8 @@ public:
         if (target)
         {
             // check online security
-            if (handler->HasLowerSecurity(target, ObjectGuid::Empty))
-                return false;
+            // if (handler->HasLowerSecurity(target, ObjectGuid::Empty))
+            //     return false;
 
 			// check appear status
 			if (!target->GetCommandStatus(TOGGLE_APPEAR) && !isAdmin)
@@ -460,7 +460,7 @@ public:
 
 		bool isAdmin;
 
-		QueryResult result = LoginDatabase.PQuery("SELECT COUNT(*) FROM account_access WHERE id = '%u' AND gmlevel >= 1", _player->GetGUID());
+		QueryResult result = LoginDatabase.PQuery("SELECT COUNT(*) FROM account_access WHERE id = '%u' AND gmlevel >= 3", _player->GetGUID());
 		Field * fields = result->Fetch();
 
 		if (fields[0].GetInt32() >= 1)
@@ -474,8 +474,8 @@ public:
         {
             std::string nameLink = handler->playerLink(targetName);
             // check online security
-            if (handler->HasLowerSecurity(target, ObjectGuid::Empty))
-                return false;
+            // if (handler->HasLowerSecurity(target, ObjectGuid::Empty))
+            //    return false;
 
 			// check summon toggle
 
@@ -2595,6 +2595,7 @@ public:
             unit = handler->GetSession()->GetPlayer();
 
         unit->RemoveCharmAuras();
+		Sleep(1);
 		unit->CombatStop();
 
         return true;

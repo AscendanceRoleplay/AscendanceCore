@@ -114,18 +114,24 @@ public:
 			}
 			break;
 		case SEC_MODERATOR:
+			msg += COMMUNITYMANAGER_ICON;
+			msg += COMMUNITYMANAGER_PREFIX;
+			msg += nameLink;
+			msg += COMMUNITYMANAGER_SUFFIX;
+			break;
+		case SEC_GAMEMASTER:
 			msg += BUILDER_ICON;
 			msg += BUILDER_PREFIX;
 			msg += nameLink;
 			msg += BUILDER_SUFFIX;
 			break;
-		case SEC_GAMEMASTER:
+		case SEC_ADMINISTRATOR:
 			msg += DUNGEONMASTER_ICON;
 			msg += DUNGEONMASTER_PREFIX;
 			msg += nameLink;
 			msg += DUNGEONMASTER_SUFFIX;
 			break;
-		case SEC_ADMINISTRATOR:
+		case SEC_STAFFMEMBER:
 			msg += ARCHITECT_ICON;
 			msg += ARCHITECT_PREFIX;
 			msg += nameLink;
@@ -148,12 +154,6 @@ public:
 			msg += COMMUNITYREPRESENTATIVE_PREFIX;
 			msg += nameLink;
 			msg += COMMUNITYREPRESENTATIVE_SUFFIX;
-			break;
-		case SEC_STAFFMEMBER:
-			msg += COMMUNITYMANAGER_ICON;
-			msg += COMMUNITYMANAGER_PREFIX;
-			msg += nameLink;
-			msg += COMMUNITYMANAGER_SUFFIX;
 			break;
 		case SEC_COUNCILMEMBER:
 			msg += COUNCILMEMBER_ICON;

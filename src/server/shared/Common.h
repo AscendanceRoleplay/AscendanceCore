@@ -95,13 +95,13 @@ enum TimeConstants
 enum AccountTypes
 {
 	SEC_PLAYER = 0, //Player
-	SEC_MODERATOR = 1, //Builder
-	SEC_GAMEMASTER = 2, //Dungeon Master
-	SEC_ADMINISTRATOR = 3, //Architect
-	SEC_EVENTMASTER = 4, //Event Master
-	SEC_LOREMASTER = 5, //Lore Master
-	SEC_COMMUNITYREPRESENTATIVE = 6, //Community Representative
-	SEC_STAFFMEMBER = 7, //Staff Member
+	SEC_MODERATOR = 1, //Noble
+	SEC_GAMEMASTER = 2, //Builder
+	SEC_ADMINISTRATOR = 3, //Dungeon Master
+	SEC_STAFFMEMBER = 4, //Architect
+	SEC_EVENTMASTER = 5, //Event Master
+	SEC_LOREMASTER = 6, //Lore Master
+	SEC_COMMUNITYREPRESENTATIVE = 7, //Community Representative
 	SEC_COUNCILMEMBER = 8, //Council Member
 	SEC_HEADDEVELOPER = 9, //Head Developer
 	SEC_CONSOLE = 10, //Console Must be always last in list, accounts must have less security level
