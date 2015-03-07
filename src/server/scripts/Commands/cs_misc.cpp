@@ -2595,7 +2595,7 @@ public:
             unit = handler->GetSession()->GetPlayer();
 
         unit->RemoveCharmAuras();
-		Sleep(1);
+		sleep(1);
 		unit->CombatStop();
 
         return true;
