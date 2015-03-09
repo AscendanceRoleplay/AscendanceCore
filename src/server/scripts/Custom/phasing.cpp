@@ -604,6 +604,8 @@ public:
 
 		uint32 phase = atoi(phasing);
 
+		uint32 donor = 0;
+
 		if (!phase)
 		{
 			handler->SendSysMessage("You cannot spawn creatures in the main phase!");
@@ -616,6 +618,32 @@ public:
 			handler->SendSysMessage("You cannot spawn creatures in the main phase!");
 			handler->SetSentErrorMessage(true);
 			return false;
+		}
+
+		if (phase == 3)
+		{
+			QueryResult o_result = LoginDatabase.PQuery("SELECT object_permanence FROM account WHERE id='%u'", chr->GetSession()->GetAccountId());
+			Field * o_fields = o_result->Fetch();
+			if (o_fields[0].GetInt32() == 0)
+			{
+				handler->SendSysMessage("You do not have privelages to spawn permanent creatures, this will be temporary.");
+				if (!sObjectMgr->GetCreatureTemplate(id))
+					return false;
+
+				Creature* creature = new Creature();
+
+				chr->SummonCreature(id, *chr, TEMPSUMMON_CORPSE_DESPAWN, 86400);
+
+				creature->ClearPhases();
+				creature->SetInPhase(phase, true, true);
+				creature->SetDBPhase(phase);
+
+				return true;
+			}
+			else if (o_fields[0].GetInt32() == 1)
+			{
+				donor = 1;
+			}
 		}
 
 		if (Transport* trans = chr->GetTransport())
@@ -646,7 +674,7 @@ public:
 			return false;
 		}
 
-		if (phase)
+		if (phase && (donor == 0))
 		{
 			QueryResult result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM phase_members WHERE guid='%u' AND phase='%u' LIMIT 1", chr->GetGUID(), phase);
 
@@ -807,6 +835,8 @@ public:
 		if (!objectId)
 			return false;
 
+		uint32 donor = 0;
+
 		char* spawntimeSecs = strtok(NULL, " ");
 
 		const GameObjectTemplate* objectInfo = sObjectMgr->GetGameObjectTemplate(objectId);
@@ -893,13 +923,11 @@ public:
 			}
 			else if (o_fields[0].GetInt32() == 1)
 			{
-				handler->SendSysMessage("This feature is not added yet!");
-				handler->SetSentErrorMessage(true);
-				return false;
+				donor = 1;
 			}
 		}
 
-		if (phase)
+		if (phase && (donor == 0))
 		{
 			QueryResult result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM phase_members WHERE guid='%u' AND phase='%u' LIMIT 1", player->GetSession()->GetAccountId(), phase);
 
