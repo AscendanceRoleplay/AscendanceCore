@@ -644,6 +644,12 @@ public:
 			{
 				donor = 1;
 			}
+			else if (o_fields[0].GetInt32() == 2)
+			{
+				handler->SendSysMessage("This feature has been disabled for your account!");
+				handler->SetSentErrorMessage(true);
+				return false;
+			}
 		}
 
 		if (Transport* trans = chr->GetTransport())
@@ -924,6 +930,12 @@ public:
 			else if (o_fields[0].GetInt32() == 1)
 			{
 				donor = 1;
+			}
+			else if (o_fields[0].GetInt32() == 2)
+			{
+				handler->SendSysMessage("This feature has been disabled for your account!");
+				handler->SetSentErrorMessage(true);
+				return false;
 			}
 		}
 
