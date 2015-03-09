@@ -110,7 +110,6 @@ public:
 			player->SetInPhase(phase, true, !player->IsInPhase(phase));
 			player->ToPlayer()->SendUpdatePhasing();
 
-			CharacterDatabase.PExecute("UPDATE phase SET get_phase='%u' WHERE guid='%u'", phase, player->GetSession()->GetAccountId());
 			chat->PSendSysMessage("|cff4169E1You are now entering phase 0.|r (Default Phase)");
 
 			return true;
@@ -121,7 +120,6 @@ public:
 			player->SetInPhase(phase, true, !player->IsInPhase(phase));
 			player->ToPlayer()->SendUpdatePhasing();
 
-			CharacterDatabase.PExecute("UPDATE phase SET get_phase='%u' WHERE guid='%u'", phase, player->GetSession()->GetAccountId());
 			chat->PSendSysMessage("|cff4169E1You are now entering phase 1.|r (Main Event Phase)");
 
 			return true;
@@ -132,26 +130,19 @@ public:
 			player->SetInPhase(phase, true, !player->IsInPhase(phase));
 			player->ToPlayer()->SendUpdatePhasing();
 
-			CharacterDatabase.PExecute("UPDATE phase SET get_phase='%u' WHERE guid='%u'", phase, player->GetSession()->GetAccountId());
 			chat->PSendSysMessage("|cff4169E1You are now entering phase 2.|r (Main Interior Phase)");
 
 			return true;
 		}
-
-		QueryResult hasPhase = CharacterDatabase.PQuery("SELECT COUNT(*) FROM phase WHERE guid='%u'", player->GetSession()->GetAccountId());
-		if (hasPhase)
+		else if (phase == 3)
 		{
-			do
-			{
-				Field * fields = hasPhase->Fetch();
-				if (fields[0].GetInt32() == 0)
-				{
-					chat->PSendSysMessage("|cffFF0000You need to create a phase before joining one!|r");
+			player->ClearPhases();
+			player->SetInPhase(phase, true, !player->IsInPhase(phase));
+			player->ToPlayer()->SendUpdatePhasing();
 
-					chat->SetSentErrorMessage(true);
-					return false;
-				}
-			} while (hasPhase->NextRow());
+			chat->PSendSysMessage("|cff4169E1You are now entering phase 3.|r (Free Build Phase)");
+
+			return true;
 		}
 
 		QueryResult phaseExist = CharacterDatabase.PQuery("SELECT COUNT(*) FROM phase WHERE phase_owned='%u'", phase);
@@ -167,7 +158,7 @@ public:
 					chat->SetSentErrorMessage(true);
 					return false;
 				}
-			} while (hasPhase->NextRow());
+			} while (phaseExist->NextRow());
 		}
 
 		QueryResult isCompleted = CharacterDatabase.PQuery("SELECT * FROM phase WHERE phase='%u'", phase);
@@ -187,7 +178,6 @@ public:
 					player->SetInPhase(phase, true, !player->IsInPhase(phase));
 					player->ToPlayer()->SendUpdatePhasing();
 
-					CharacterDatabase.PExecute("UPDATE phase SET get_phase='%u' WHERE guid='%u'", phase, player->GetSession()->GetAccountId());
 					chat->PSendSysMessage("|cff4169E1You are now entering phase %u.|r (%s)", phase, phaseName);
 
 					return true;
@@ -198,7 +188,6 @@ public:
 					player->SetInPhase(phase, true, !player->IsInPhase(phase));
 					player->ToPlayer()->SendUpdatePhasing();
 
-					CharacterDatabase.PExecute("UPDATE phase SET get_phase='%u' WHERE guid='%u'", phase, player->GetSession()->GetAccountId());
 					chat->PSendSysMessage("|cffffffffYou are now entering your own phase %u.|r (%s)", phase, phaseName);
 
 					return true;
@@ -222,7 +211,6 @@ public:
 		player->ClearPhases();
 		player->ToPlayer()->SendUpdatePhasing();
 
-		CharacterDatabase.PExecute("UPDATE phase SET get_phase='%u' WHERE guid='%u'", 0, player->GetSession()->GetAccountId());
 		handler->PSendSysMessage("|cff4169E1You are now entering phase 0.|r (Default Phase)");
 
 		return true;
@@ -250,6 +238,12 @@ public:
 			return false;
 		}
 		else if (phase == 2){ // Phase 2 is reserved, ownership is denied.
+			chat->SendSysMessage("|cffFF0000You cannot own a reserved phase!|r");
+
+			chat->SetSentErrorMessage(true);
+			return false;
+		}
+		else if (phase == 3){ // Phase 3 is reserved, ownership is denied.
 			chat->SendSysMessage("|cffFF0000You cannot own a reserved phase!|r");
 
 			chat->SetSentErrorMessage(true);
@@ -313,45 +307,9 @@ public:
 		if (!res)
 			return false;
 
-		QueryResult phaseObjects = WorldDatabase.PQuery("SELECT * FROM gameobject WHERE PhaseId='%u'", fields[3].GetInt32());
-
-		CharacterDatabase.PExecute("DELETE FROM phase WHERE (guid='%u')", player->GetSession()->GetAccountId());
-		CharacterDatabase.PExecute("DELETE FROM phase_members WHERE (guid='%u')", player->GetSession()->GetAccountId());
-
-		if (phaseObjects)
-		{
-			do
-			{
-				Field * o_fields = phaseObjects->Fetch();
-
-				char* id = chat->extractKeyFromLink((char*)o_fields[1].GetCString(), "Hgameobject");
-				if (!id)
-					return false;
-
-				uint32 guidLow = o_fields[0].GetInt32();
-				if (!guidLow)
-					return false;
-
-				GameObject* object = NULL;
-
-				// by DB guid
-				if (GameObjectData const* gameObjectData = sObjectMgr->GetGOData(guidLow))
-					object = chat->GetObjectGlobalyWithGuidOrNearWithDbGuid(guidLow, gameObjectData->id);
-
-				if (!object)
-				{
-					chat->PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, guidLow);
-					chat->SetSentErrorMessage(true);
-					return false;
-				}
-
-				object->SetRespawnTime(0);                                 // not save respawn time
-				object->Delete();
-				object->DeleteFromDB();
-
-				chat->PSendSysMessage("|cffADD8E6Phased Objects Have Been Cleared!|r");
-			} while (phaseObjects->NextRow());
-		}
+		CharacterDatabase.PExecute("DELETE FROM phase WHERE guid='%u'", player->GetSession()->GetAccountId());
+		CharacterDatabase.PExecute("UPDATE characters SET phase_owned='NULL' WHERE account='%u'", player->GetSession()->GetAccountId());
+		CharacterDatabase.PExecute("DELETE FROM phase_members WHERE can_build_in_phase='%u'", fields[3].GetInt32());
 
 		chat->SendSysMessage("|cffFFFF00Your phase has now been deleted.|r");
 		return true;
@@ -360,7 +318,7 @@ public:
 	static bool HandlePhaseGetCommand(ChatHandler * chat, const char * args)
 	{
 		Player * player = chat->GetSession()->GetPlayer();
-		QueryResult getPhaseAndOwnedPhase = CharacterDatabase.PQuery("SELECT COUNT(*),get_phase,phase,phase_name FROM phase WHERE guid='%u'", player->GetSession()->GetAccountId());
+		QueryResult getPhaseAndOwnedPhase = CharacterDatabase.PQuery("SELECT COUNT(*), phase_owned, phase_name FROM phase WHERE guid='%u'", player->GetSession()->GetAccountId());
 		if (!getPhaseAndOwnedPhase)
 			return false;
 
@@ -389,7 +347,7 @@ public:
 					chat->SetSentErrorMessage(true);
 					return false;
 				}
-				chat->PSendSysMessage("|cffADD8E6Current Phase: %u \n Actual Phase: %u \n Owned Phase: %u (%s)|r", phase, fields[2].GetUInt32(), phase, fields[3].GetCString());
+				chat->PSendSysMessage("|cffADD8E6Current Phase: %u \n Owned Phase: %u (%s)|r", phase, fields[1].GetUInt32(), fields[2].GetCString());
 			} while (getPhaseAndOwnedPhase->NextRow());
 		}
 		return true;
@@ -602,7 +560,6 @@ public:
 				target->ToPlayer()->SendUpdatePhasing();
 				snprintf(msg, 255, "|cffFF0000You were kicked from phase %u by %s!|r", phase, player->GetName().c_str());
 				player->Whisper(msg, LANG_UNIVERSAL, target);
-				CharacterDatabase.PExecute("UPDATE phase SET get_phase='0' WHERE (guid='%u')", target->GetGUID());
 			}
 			else
 			{
@@ -691,50 +648,34 @@ public:
 
 		if (phase)
 		{
-			QueryResult res = CharacterDatabase.PQuery("SELECT get_phase FROM phase WHERE guid='%u'", chr->GetGUID());
-			if (res)
+			QueryResult result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM phase_members WHERE guid='%u' AND phase='%u' LIMIT 1", chr->GetGUID(), phase);
+
+			if (!result)
+			{
+				handler->SendSysMessage("You must be added to this phase before you can add creatures.");
+				handler->SetSentErrorMessage(true);
+				return false;
+			}
+
+			if (result)
 			{
 				do
 				{
-					Field * fields = res->Fetch();
-					uint32 val = fields[0].GetUInt32();
-					if (val != phase)
+					if (phase == 0)
 					{
-						handler->SendSysMessage("You are not in this phase!");
+						handler->SendSysMessage("You cannot spawn creatures in the main phase!");
 						handler->SetSentErrorMessage(true);
 						return false;
 					}
 
-					QueryResult result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM phase_members WHERE guid='%u' AND phase='%u' LIMIT 1", chr->GetGUID(), (uint32)val);
-
-					if (!result)
+					Field * fields = result->Fetch();
+					if (fields[0].GetInt32() == 0)
 					{
 						handler->SendSysMessage("You must be added to this phase before you can add creatures.");
 						handler->SetSentErrorMessage(true);
 						return false;
 					}
-
-					if (result)
-					{
-						do
-						{
-							if (val == 0)
-							{
-								handler->SendSysMessage("You cannot spawn creatures in the main phase!");
-								handler->SetSentErrorMessage(true);
-								return false;
-							}
-
-							Field * fields = result->Fetch();
-							if (fields[0].GetInt32() == 0)
-							{
-								handler->SendSysMessage("You must be added to this phase before you can add creatures.");
-								handler->SetSentErrorMessage(true);
-								return false;
-							}
-						} while (result->NextRow());
-					}
-				} while (res->NextRow());
+				} while (result->NextRow());
 			}
 		}
 
@@ -801,50 +742,35 @@ public:
 
 		if (phase)
 		{
-			QueryResult res = CharacterDatabase.PQuery("SELECT get_phase FROM phase WHERE guid='%u'", chr->GetGUID());
-			if (res)
+
+			QueryResult result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM phase_members WHERE guid='%u' AND phase='%u' LIMIT 1", chr->GetGUID(), phase);
+
+			if (!result)
+			{
+				handler->SendSysMessage("You must be added to this phase before you can add creatures.");
+				handler->SetSentErrorMessage(true);
+				return false;
+			}
+
+			if (result)
 			{
 				do
 				{
-					Field * fields = res->Fetch();
-					uint32 val = fields[0].GetUInt32();
-					if (val != phase)
+					if (phase == 0)
 					{
-						handler->SendSysMessage("You are not in this phase!");
+						handler->SendSysMessage("You cannot spawn creatures in the main phase!");
 						handler->SetSentErrorMessage(true);
 						return false;
 					}
 
-					QueryResult result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM phase_members WHERE guid='%u' AND phase='%u' LIMIT 1", chr->GetGUID(), (uint32)val);
-
-					if (!result)
+					Field * fields = result->Fetch();
+					if (fields[0].GetInt32() == 0)
 					{
-						handler->SendSysMessage("You must be added to this phase before you can add creatures.");
+						handler->SendSysMessage("You must be added to this phase before you can delete creatures.");
 						handler->SetSentErrorMessage(true);
 						return false;
 					}
-
-					if (result)
-					{
-						do
-						{
-							if (val == 0)
-							{
-								handler->SendSysMessage("You cannot spawn creatures in the main phase!");
-								handler->SetSentErrorMessage(true);
-								return false;
-							}
-
-							Field * fields = result->Fetch();
-							if (fields[0].GetInt32() == 0)
-							{
-								handler->SendSysMessage("You must be added to this phase before you can delete creatures.");
-								handler->SetSentErrorMessage(true);
-								return false;
-							}
-						} while (result->NextRow());
-					}
-				} while (res->NextRow());
+				} while (result->NextRow());
 			}
 		}
 
@@ -906,7 +832,12 @@ public:
 		float y = float(player->GetPositionY());
 		float z = float(player->GetPositionZ());
 		float o = float(player->GetOrientation());
+
+		float rot2 = std::sin(o / 2);
+		float rot3 = std::cos(o / 2);
 		Map* map = player->GetMap();
+
+		uint32 spawntm = 86400;
 
 		std::stringstream phases;
 
@@ -936,52 +867,68 @@ public:
 			return false;
 		}
 
+		if (phase == 3)
+		{
+			QueryResult o_result = LoginDatabase.PQuery("SELECT object_permanence FROM account WHERE id='%u'", player->GetSession()->GetAccountId());
+			Field * o_fields = o_result->Fetch();
+			if (o_fields[0].GetInt32() == 0)
+			{
+				handler->SendSysMessage("You do not have privelages to spawn permanent objects, this will be temporary.");
+				if (!sObjectMgr->GetGameObjectTemplate(objectId))
+				{
+					handler->PSendSysMessage(LANG_GAMEOBJECT_NOT_EXIST, objectId);
+					handler->SetSentErrorMessage(true);
+					return false;
+				}
+
+				GameObject* object = new GameObject;
+
+				player->SummonGameObject(objectId, x, y, z, o, 0, 0, rot2, rot3, spawntm);
+
+				object->ClearPhases();
+				object->SetInPhase(phase, true, true);
+				object->SetDBPhase(phase);
+
+				return true;
+			}
+			else if (o_fields[0].GetInt32() == 1)
+			{
+				handler->SendSysMessage("This feature is not added yet!");
+				handler->SetSentErrorMessage(true);
+				return false;
+			}
+		}
+
 		if (phase)
 		{
-			QueryResult res = CharacterDatabase.PQuery("SELECT get_phase FROM phase WHERE guid='%u'", player->GetSession()->GetAccountId());
-			if (res)
+			QueryResult result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM phase_members WHERE guid='%u' AND phase='%u' LIMIT 1", player->GetSession()->GetAccountId(), phase);
+
+			if (!result)
+			{
+				handler->SendSysMessage("You must be added to this phase before you can add creatures.");
+				handler->SetSentErrorMessage(true);
+				return false;
+			}
+
+			if (result)
 			{
 				do
 				{
-					Field * fields = res->Fetch();
-					uint32 val = fields[0].GetUInt32();
-					if (val != phase)
+					if (phase == 0)
 					{
-						handler->SendSysMessage("You are not in this phase!");
+						handler->SendSysMessage("You cannot spawn objects in the main phase!");
 						handler->SetSentErrorMessage(true);
 						return false;
 					}
 
-					QueryResult result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM phase_members WHERE guid='%u' AND phase='%u' LIMIT 1", player->GetSession()->GetAccountId(), (uint32)val);
-
-					if (!result)
+					Field * fields = result->Fetch();
+					if (fields[0].GetInt32() == 0)
 					{
-						handler->SendSysMessage("You must be added to this phase before you can add creatures.");
+						handler->SendSysMessage("You must be added to this phase before you can spawn objects.");
 						handler->SetSentErrorMessage(true);
 						return false;
 					}
-
-					if (result)
-					{
-						do
-						{
-							if (val == 0)
-							{
-								handler->SendSysMessage("You cannot spawn objects in the main phase!");
-								handler->SetSentErrorMessage(true);
-								return false;
-							}
-
-							Field * fields = result->Fetch();
-							if (fields[0].GetInt32() == 0)
-							{
-								handler->SendSysMessage("You must be added to this phase before you can spawn objects.");
-								handler->SetSentErrorMessage(true);
-								return false;
-							}
-						} while (result->NextRow());
-					}
-				} while (res->NextRow());
+				} while (result->NextRow());
 			}
 		}
 
@@ -1089,60 +1036,44 @@ public:
 
 		if (phase)
 		{
-			QueryResult res = CharacterDatabase.PQuery("SELECT get_phase FROM phase WHERE guid='%u'", player->GetSession()->GetAccountId());
-			if (res)
+			QueryResult objectPhase = WorldDatabase.PQuery("SELECT PhaseId FROM gameobject WHERE guid='%u'", object->GetGUID());
+
+			QueryResult result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM phase_members WHERE guid='%u' AND phase='%u' LIMIT 1", player->GetSession()->GetAccountId(), phase);
+
+			if (!result)
+			{
+				handler->SendSysMessage("You must be added to this phase before you can add creatures.");
+				handler->SetSentErrorMessage(true);
+				return false;
+			}
+
+			if (result)
 			{
 				do
 				{
-					Field * fields = res->Fetch();
-					uint32 val = fields[0].GetUInt32();
-					if (val != phase)
+					if (phase == 0)
 					{
-						handler->SendSysMessage("You are not in this phase!");
+						handler->SendSysMessage("You cannot delete objects in the main phase!");
 						handler->SetSentErrorMessage(true);
 						return false;
 					}
 
-					QueryResult objectPhase = WorldDatabase.PQuery("SELECT PhaseId FROM gameobject WHERE guid='%u'", object->GetGUID());
-
-					QueryResult result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM phase_members WHERE guid='%u' AND phase='%u' LIMIT 1", player->GetSession()->GetAccountId(), (uint32)val);
-
-					if (!result)
+					Field * fields = result->Fetch();
+					if (fields[0].GetInt32() == 0)
 					{
-						handler->SendSysMessage("You must be added to this phase before you can add creatures.");
+						handler->SendSysMessage("You must be added to this phase before you can delete objects.");
 						handler->SetSentErrorMessage(true);
 						return false;
 					}
 
-					if (result)
+					Field * objFields = result->Fetch();
+					if (objFields[0].GetInt32() == phase)
 					{
-						do
-						{
-							if (val == 0)
-							{
-								handler->SendSysMessage("You cannot delete objects in the main phase!");
-								handler->SetSentErrorMessage(true);
-								return false;
-							}
-
-							Field * fields = result->Fetch();
-							if (fields[0].GetInt32() == 0)
-							{
-								handler->SendSysMessage("You must be added to this phase before you can delete objects.");
-								handler->SetSentErrorMessage(true);
-								return false;
-							}
-
-							Field * objFields = result->Fetch();
-							if (objFields[0].GetInt32() == (uint32)val)
-							{
-								handler->SendSysMessage("That object is not in your current phase!");
-								handler->SetSentErrorMessage(true);
-								return false;
-							}
-						} while (result->NextRow());
+						handler->SendSysMessage("That object is not in your current phase!");
+						handler->SetSentErrorMessage(true);
+						return false;
 					}
-				} while (res->NextRow());
+				} while (result->NextRow());
 			}
 		}
 
