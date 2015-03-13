@@ -6,11 +6,6 @@
 #include "ObjectAccessor.h"
 #include "Transport.h"
 #include "Language.h"
-#include "ScriptMgr.h"
-#include "ObjectMgr.h"
-#include "World.h"
-#include "Player.h"
-#include "Opcodes.h"
 
 using namespace std;
 
@@ -25,7 +20,6 @@ public:
 		static ChatCommand animcommandTable[] =
 		{
 			{ "anim", SEC_PLAYER, false, &HandleAnimCommand, "", NULL },
-			{ "fly", SEC_PLAYER, false, &HandleFlyCommand, "", NULL },
 		};
 		return animcommandTable;
 	}
@@ -40,31 +34,6 @@ public:
 
 		return true;
 	}
-
-	static bool HandleFlyCommand(ChatHandler* handler, char const* args)
-	{
-		if (!*args)
-			return false;
-
-		Player* target = handler->getSelectedPlayer();
-		if (!target)
-			target = handler->GetSession()->GetPlayer();
-
-		WorldPacket data;
-
-		if (strncmp(args, "on", 3) == 0)
-			target->SetCanFly(true);
-		else if (strncmp(args, "off", 4) == 0)
-			target->SetCanFly(false);
-		else
-		{
-			handler->SendSysMessage(LANG_USE_BOL);
-			return false;
-		}
-		handler->PSendSysMessage(LANG_COMMAND_FLYMODE_STATUS, handler->GetNameLink(target).c_str(), args);
-		return true;
-	}
-
 };
 
 void AddSC_anim()
