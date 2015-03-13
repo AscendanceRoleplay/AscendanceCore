@@ -35,21 +35,17 @@ public:
 
 		WorldPacket data;
 
-		boolean enable;
-
 		if (strncmp(args, "on", 3) == 0)
 		{
 			target->AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY);
 			target->RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_SPLINE_ELEVATION);
 			target->SetFall(false);
-			enable = true;
 		}
 		else if (strncmp(args, "off", 4) == 0)
 		{
 			target->RemoveUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_MASK_MOVING_FLY);
 			if (!target->IsLevitating())
 				target->SetFall(true);
-			enable = false;
 		}
 		else
 		{
