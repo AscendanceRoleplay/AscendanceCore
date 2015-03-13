@@ -6,6 +6,11 @@
 #include "ObjectAccessor.h"
 #include "Transport.h"
 #include "Language.h"
+#include "ScriptMgr.h"
+#include "ObjectMgr.h"
+#include "World.h"
+#include "Player.h"
+#include "Opcodes.h"
 
 using namespace std;
 
