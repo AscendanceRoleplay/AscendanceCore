@@ -36,9 +36,27 @@ public:
 		WorldPacket data;
 
 		if (strncmp(args, "on", 3) == 0)
-			target->SetCanFly(true);
+		{
+			if (target->HasUnitMovementFlag(MOVEMENTFLAG_CAN_FLY))
+			{
+				return false;
+			}
+			target->AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY);
+			target->RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_SPLINE_ELEVATION);
+			target->SetFall(false);
+		}
 		else if (strncmp(args, "off", 4) == 0)
-			target->SetCanFly(false);
+		{
+			if (!target->HasUnitMovementFlag(MOVEMENTFLAG_CAN_FLY))
+			{
+				return false;
+			}
+			target->RemoveUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_MASK_MOVING_FLY);
+			if (!target->IsLevitating())
+			{
+				target->SetFall(true);
+			}
+		}
 		else
 		{
 			handler->SendSysMessage(LANG_USE_BOL);
