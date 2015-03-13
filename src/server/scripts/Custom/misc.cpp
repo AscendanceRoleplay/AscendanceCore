@@ -6,6 +6,7 @@
 #include "ObjectAccessor.h"
 #include "Transport.h"
 #include "Language.h"
+#include "MovementStructures.h"
 
 using namespace std;
 
@@ -35,17 +36,21 @@ public:
 
 		WorldPacket data;
 
+		Unit* player = handler->GetSession()->GetPlayer();
+
 		if (strncmp(args, "on", 3) == 0)
 		{
 			target->AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY);
 			target->RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_SPLINE_ELEVATION);
 			target->SetFall(false);
+			Movement::PacketSender(player, SMSG_SPLINE_MOVE_SET_FLYING, SMSG_MOVE_SET_CAN_FLY).Send();
 		}
 		else if (strncmp(args, "off", 4) == 0)
 		{
 			target->RemoveUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_MASK_MOVING_FLY);
 			if (!target->IsLevitating())
 				target->SetFall(true);
+			Movement::PacketSender(player, SMSG_SPLINE_MOVE_UNSET_FLYING, SMSG_MOVE_UNSET_CAN_FLY).Send();
 		}
 		else
 		{
