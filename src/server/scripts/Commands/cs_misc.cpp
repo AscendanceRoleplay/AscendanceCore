@@ -296,17 +296,22 @@ public:
             return false;
         }
 
-		bool isAdmin;
+		bool isAdmin = false;
 
 		QueryResult result = LoginDatabase.PQuery("SELECT COUNT(*) FROM account_access WHERE id = '%u' AND gmlevel >= 3", _player->GetGUID());
 		Field * fields = result->Fetch();
 
-		if (fields[0].GetInt32() >= 1)
+		if (result)
 		{
-			isAdmin = true;
+			do
+			{
+				Field * fields = result->Fetch();
+				if (fields[0].GetInt32() >= 1)
+				{
+					isAdmin = true;
+				}
+			} while (result->NextRow());
 		}
-		else
-			isAdmin = false;
 
         if (target)
         {
@@ -463,12 +468,17 @@ public:
 		QueryResult result = LoginDatabase.PQuery("SELECT COUNT(*) FROM account_access WHERE id = '%u' AND gmlevel >= 3", _player->GetGUID());
 		Field * fields = result->Fetch();
 
-		if (fields[0].GetInt32() >= 1)
+		if (result)
 		{
-			isAdmin = true;
+			do
+			{
+				Field * fields = result->Fetch();
+				if (fields[0].GetInt32() >= 1)
+				{
+					isAdmin = true;
+				}
+			} while (result->NextRow());
 		}
-		else
-			isAdmin = false;
 
         if (target)
         {
