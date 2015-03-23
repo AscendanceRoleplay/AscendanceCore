@@ -298,7 +298,7 @@ public:
 
 		bool isAdmin = false;
 
-		QueryResult result = LoginDatabase.PQuery("SELECT COUNT(*) FROM account_access WHERE id = '%u' AND gmlevel >= 3", _player->GetGUID());
+		QueryResult result = LoginDatabase.PQuery("SELECT COUNT(*) FROM account_access WHERE id = '%u' AND gmlevel >= 3", _player->GetSession()->GetAccountId());
 		Field * fields = result->Fetch();
 
 		if (result)
@@ -465,7 +465,7 @@ public:
 
 		bool isAdmin;
 
-		QueryResult result = LoginDatabase.PQuery("SELECT COUNT(*) FROM account_access WHERE id = '%u' AND gmlevel >= 3", _player->GetGUID());
+		QueryResult result = LoginDatabase.PQuery("SELECT COUNT(*) FROM account_access WHERE id = '%u' AND gmlevel >= 3", _player->GetSession()->GetAccountId());
 		Field * fields = result->Fetch();
 
 		if (result)
