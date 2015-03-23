@@ -25,7 +25,6 @@ void CreatePhase(Player * player, bool IsMember, uint32 phase)
 			<< "'" << userName << "',"
 			<< "'" << phase << "',"
 			<< "'" << phase << "',"
-			<< "'" << phase << "',"
 			<< "'" << "0" << "',"
 			<< "'" << player->GetName() << "');";
 
@@ -302,6 +301,26 @@ public:
 		Player * player = chat->GetSession()->GetPlayer();
 
 		player->SetPhaseMask(0, true);
+
+		QueryResult result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM phase WHERE guid = '%u' LIMIT 1", player->GetSession()->GetAccountId());
+		if (result)
+		{
+			do
+			{
+				Field * r_fields = result->Fetch();
+				if (r_fields[0].GetInt32() == 0)
+				{
+					chat->SendSysMessage("|cffFF0000You do not own a phase!|r");
+					chat->SetSentErrorMessage(true);
+					return false;
+				}
+				else
+				{
+					return true;
+				}
+			} while (result->NextRow());
+		}
+
 		QueryResult res = CharacterDatabase.PQuery("SELECT * FROM phase WHERE guid='%u' LIMIT 1", player->GetSession()->GetAccountId());
 		Field * fields = res->Fetch();
 		if (!res)
