@@ -974,6 +974,8 @@ void World::LoadConfigSettings(bool reload)
 
     m_int_configs[CONFIG_DISABLE_BREATHING] = sConfigMgr->GetIntDefault("DisableWaterBreath", SEC_CONSOLE);
 
+	m_int_configs[CONFIG_DISABLE_FATIGUE] = sConfigMgr->GetIntDefault("DisableFatigue", SEC_CONSOLE);
+
     if (reload)
     {
         uint32 val = sConfigMgr->GetIntDefault("Expansion", 2);
