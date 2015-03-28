@@ -302,13 +302,13 @@ public:
 
 		player->SetPhaseMask(0, true);
 
-		QueryResult result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM phase WHERE guid = '%u' LIMIT 1", player->GetSession()->GetAccountId());
+		QueryResult result = CharacterDatabase.PQuery("SELECT COUNT(*), phase FROM phase WHERE guid = '%u' LIMIT 1", player->GetSession()->GetAccountId());
+		Field * fields = result->Fetch();
 		if (result)
 		{
 			do
 			{
-				Field * r_fields = result->Fetch();
-				if (r_fields[0].GetInt32() == 0)
+				if (fields[0].GetInt32() == 0)
 				{
 					chat->SendSysMessage("|cffFF0000You do not own a phase!|r");
 					chat->SetSentErrorMessage(true);
@@ -321,14 +321,9 @@ public:
 			} while (result->NextRow());
 		}
 
-		QueryResult res = CharacterDatabase.PQuery("SELECT * FROM phase WHERE guid='%u' LIMIT 1", player->GetSession()->GetAccountId());
-		Field * fields = res->Fetch();
-		if (!res)
-			return false;
-
 		CharacterDatabase.PExecute("DELETE FROM phase WHERE guid='%u'", player->GetSession()->GetAccountId());
 		CharacterDatabase.PExecute("UPDATE characters SET phase_owned='NULL' WHERE account='%u'", player->GetSession()->GetAccountId());
-		CharacterDatabase.PExecute("DELETE FROM phase_members WHERE can_build_in_phase='%u'", fields[3].GetInt32());
+		CharacterDatabase.PExecute("DELETE FROM phase_members WHERE can_build_in_phase='%u'", fields[1].GetInt32());
 
 		chat->SendSysMessage("|cffFFFF00Your phase has now been deleted.|r");
 		return true;

@@ -5,6 +5,7 @@
 #include "PoolMgr.h"
 #include "ObjectAccessor.h"
 #include "Transport.h"
+#include "Language.h"
 using namespace std;
 
 class refresh : public CommandScript
@@ -22,33 +23,34 @@ public:
 		return refreshcommandTable;
 	}
 
-	static bool HandleRefreshCommand(ChatHandler* handler, const char* /*args*/)
+	// Teleport player to last position
+	static bool HandleRefreshCommand(ChatHandler* handler, char const* args)
 	{
-		Unit* target = handler->GetSession()->GetPlayer();
+		Player* target;
+		if (!handler->extractPlayerTarget((char*)args, &target))
+			return false;
 
-		std::stringstream phases;
+		target->SaveRecallPosition();
 
-		for (uint32 phase : target->GetPhases())
+		// check online security
+		if (handler->HasLowerSecurity(target, ObjectGuid::Empty))
+			return false;
+
+		if (target->IsBeingTeleported())
 		{
-			phases << phase << " ";
+			handler->PSendSysMessage(LANG_IS_TELEPORTED, handler->GetNameLink(target).c_str());
+			handler->SetSentErrorMessage(true);
+			return false;
 		}
 
-		const char* phasing = phases.str().c_str();
+		// stop flight if need
+		if (target->IsInFlight())
+		{
+			target->GetMotionMaster()->MovementExpired();
+			target->CleanupAfterTaxiFlight();
+		}
 
-		uint32 phase = atoi(phasing);
-
-		if (!phase)
-			uint32 phase = 0;
-
-		target->SetInPhase(1, true, !target->IsInPhase(phase));
-		sleep(1);
-		target->ClearPhases();
-		sleep(1);
-		target->SetInPhase(phase, true, !target->IsInPhase(phase));
-
-		if (target->GetTypeId() == TYPEID_PLAYER)
-			target->ToPlayer()->SendUpdatePhasing();
-
+		target->TeleportTo(target->m_recallMap, target->m_recallX, target->m_recallY, target->m_recallZ, target->m_recallO);
 		return true;
 	}
 };
