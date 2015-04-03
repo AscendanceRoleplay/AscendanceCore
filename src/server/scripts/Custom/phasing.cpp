@@ -290,6 +290,7 @@ public:
 
 		CreatePhase(player, false, phase);
 		CreatePhase(player, true, phase);
+		player->ClearPhases();
 		player->SetInPhase(phase, true, !player->IsInPhase(phase));
 		player->ToPlayer()->SendUpdatePhasing();
 		chat->SendSysMessage("|cff4169E1You have created your phase!|r \n |cffbbbbbb.phase join #|r - |cff00FF00is to join a phase.|r \n |cffbbbbbb.phase complete|r - |cff00FF00completes your phase for the public to join and see.|r");
@@ -300,7 +301,8 @@ public:
 	{
 		Player * player = chat->GetSession()->GetPlayer();
 
-		player->SetPhaseMask(0, true);
+		player->ClearPhases();
+		player->ToPlayer()->SendUpdatePhasing();
 
 		QueryResult result = CharacterDatabase.PQuery("SELECT COUNT(*), phase FROM phase WHERE guid = '%u' LIMIT 1", player->GetSession()->GetAccountId());
 		Field * fields = result->Fetch();
@@ -313,10 +315,6 @@ public:
 					chat->SendSysMessage("|cffFF0000You do not own a phase!|r");
 					chat->SetSentErrorMessage(true);
 					return false;
-				}
-				else
-				{
-					return true;
 				}
 			} while (result->NextRow());
 		}
