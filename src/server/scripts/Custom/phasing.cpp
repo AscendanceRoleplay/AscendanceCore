@@ -169,9 +169,9 @@ public:
 			do
 			{
 				Field * fields = isCompleted->Fetch();
-				const char * phaseName = fields[6].GetCString();
+				const char * phaseName = fields[5].GetCString();
 
-				if (fields[5].GetUInt16() == 1) // if the phase is completed
+				if (fields[4].GetUInt16() == 1) // if the phase is completed
 				{
 					player->ClearPhases();
 					player->SetInPhase(phase, true, !player->IsInPhase(phase));
@@ -835,6 +835,86 @@ public:
 		unit->AddObjectToRemoveList();
 
 		handler->SendSysMessage(LANG_COMMAND_DELCREATMESSAGE);
+
+		return true;
+	}
+
+	static bool HandlePhaseMoveNpcCommand(ChatHandler * handler, const char * /*args*/)
+	{
+		Creature* unit = NULL;
+
+		Creature* caster = handler->getSelectedCreature();
+		if (!caster)
+		{
+			handler->SendSysMessage(LANG_SELECT_CREATURE);
+			handler->SetSentErrorMessage(true);
+			return false;
+		}
+
+		Player* chr = handler->GetSession()->GetPlayer();
+
+		unit = handler->getSelectedCreature();
+
+		std::stringstream phases;
+
+		for (uint32 phase : chr->GetPhases())
+		{
+			phases << phase << " ";
+		}
+
+		const char* phasing = phases.str().c_str();
+
+		uint32 phase = atoi(phasing);
+
+		if (!phase)
+		{
+			handler->SendSysMessage("You cannot move creatures in the main phase!");
+			handler->SetSentErrorMessage(true);
+			return false;
+		}
+
+		if (phase == 0)
+		{
+			handler->SendSysMessage("You cannot move creatures in the main phase!");
+			handler->SetSentErrorMessage(true);
+			return false;
+		}
+
+		if (phase)
+		{
+
+			QueryResult result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM phase_members WHERE guid='%u' AND phase='%u' LIMIT 1", chr->GetGUID(), phase);
+
+			if (!result)
+			{
+				handler->SendSysMessage("You must be added to this phase before you can move creatures.");
+				handler->SetSentErrorMessage(true);
+				return false;
+			}
+
+			if (result)
+			{
+				do
+				{
+					if (phase == 0)
+					{
+						handler->SendSysMessage("You cannot move creatures in the main phase!");
+						handler->SetSentErrorMessage(true);
+						return false;
+					}
+
+					Field * fields = result->Fetch();
+					if (fields[0].GetInt32() == 0)
+					{
+						handler->SendSysMessage("You must be added to this phase before you can move creatures.");
+						handler->SetSentErrorMessage(true);
+						return false;
+					}
+				} while (result->NextRow());
+			}
+		}
+
+		caster->GetMotionMaster()->MovePoint(0, chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ());
 
 		return true;
 	}

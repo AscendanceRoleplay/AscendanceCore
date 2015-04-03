@@ -61,7 +61,6 @@ public:
 		handler->PSendSysMessage(LANG_COMMAND_FLYMODE_STATUS, handler->GetNameLink(target).c_str(), args);
 		return true;
 	}
-
 };
 
 void AddSC_misc()
