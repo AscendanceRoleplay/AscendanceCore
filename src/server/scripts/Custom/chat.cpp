@@ -127,7 +127,7 @@ public:
 		std::string msg = "";
 		Player * player = handler->GetSession()->GetPlayer();
 
-		if (player->GetCommandStatus(TOGGLE_WORLD_CHAT)){
+		if (!player->GetCommandStatus(TOGGLE_WORLD_CHAT)){
 			handler->PSendSysMessage("|cffFF0000Chat is disabled, use .toggle chat on!|r");
 			handler->SetSentErrorMessage(true);
 			return false;
