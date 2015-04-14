@@ -127,6 +127,12 @@ public:
 		std::string msg = "";
 		Player * player = handler->GetSession()->GetPlayer();
 
+		if (player->GetCommandStatus(TOGGLE_WORLD_CHAT)){
+			handler->PSendSysMessage("|cffFF0000Chat is disabled, use .toggle chat on!|r");
+			handler->SetSentErrorMessage(true);
+			return false;
+		}
+
 		QueryResult worldMute = LoginDatabase.PQuery("SELECT is_muted FROM world_mute WHERE guid='%u'", player->GetSession()->GetAccountId());
 
 		uint32 isMuted;

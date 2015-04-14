@@ -8,7 +8,8 @@ public:
 	void OnLogin(Player * player, bool)
 	{
 		player->GetSession()->SendNotification("|cffFFFF00Welcome to Ascendance!");
-		player->SetSkill(293, 1 ,1 ,1); // Plate Mail
+		player->SetCommandStatusOn(TOGGLE_WORLD_CHAT);
+		player->SetSkill(293, 1, 1, 1); // Plate Mail
 		player->SetSkill(413, 1, 1, 1); // Mail
 		player->SetSkill(414, 1, 1, 1); // Leather
 		player->SetSkill(415, 1, 1, 1);	// Cloth
