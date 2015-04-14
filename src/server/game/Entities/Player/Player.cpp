@@ -859,7 +859,7 @@ Player::Player(WorldSession* session): Unit(true)
 
 	m_toggleAppear = true;
 	m_toggleSummon = true;
-	m_toggleWorldChat = true;
+	m_toggleWorldChat = false;
 
     m_mover = this;
     m_movedPlayer = this;

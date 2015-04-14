@@ -104,13 +104,13 @@ public:
 		if (argstr == "on")
 		{
 			_player->SetCommandStatusOn(TOGGLE_WORLD_CHAT);
-			handler->SendSysMessage("Appear is ON. Players can appear to you.");
+			handler->SendSysMessage("World Chat is ON.");
 			return true;
 		}
 		else if (argstr == "off")
 		{
 			_player->SetCommandStatusOff(TOGGLE_WORLD_CHAT);
-			handler->SendSysMessage("Appear is OFF. Players can't appear to you.");
+			handler->SendSysMessage("World Chat is OFF.");
 			return true;
 		}
 
