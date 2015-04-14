@@ -42,6 +42,46 @@ std::string HEADDEVELOPER_ICON;
 std::string HEADDEVELOPER_PREFIX;
 std::string HEADDEVELOPER_SUFFIX;
 
+std::string GetNameLink(Player* player)
+{
+	std::string name = player->GetName();
+	std::string color;
+	switch (player->getClass())
+	{
+	case CLASS_DEATH_KNIGHT:
+		color = "|cffC41F3B";
+		break;
+	case CLASS_DRUID:
+		color = "|cffFF7D0A";
+		break;
+	case CLASS_HUNTER:
+		color = "|cffABD473";
+		break;
+	case CLASS_MAGE:
+		color = "|cff69CCF0";
+		break;
+	case CLASS_PALADIN:
+		color = "|cffF58CBA";
+		break;
+	case CLASS_PRIEST:
+		color = "|cffFFFFFF";
+		break;
+	case CLASS_ROGUE:
+		color = "|cffFFF569";
+		break;
+	case CLASS_SHAMAN:
+		color = "|cff0070DE";
+		break;
+	case CLASS_WARLOCK:
+		color = "|cff9482C9";
+		break;
+	case CLASS_WARRIOR:
+		color = "|cffC79C6E";
+		break;
+	}
+	return "|Hplayer:" + name + "|h|cffFFFFFF[" + color + name + "|cffFFFFFF]|h|r";
+}
+
 class chat : public CommandScript
 {
 public:
@@ -68,6 +108,22 @@ public:
 
 	static bool HandleChatCommand(ChatHandler * handler, const char * args)
 	{
+		if (!handler->GetSession()->GetPlayer()->CanSpeak())
+		{
+			handler->PSendSysMessage("|cffFF0000You have been barred from the world chat!|r");
+			handler->SetSentErrorMessage(true);
+			return false;
+		}
+
+		std::string temp = args;
+
+		if (!args || temp.find_first_not_of(' ') == std::string::npos)
+		{
+			handler->PSendSysMessage("|cffFF0000You can not send blank messages!|r");
+			handler->SetSentErrorMessage(true);
+			return false;
+		}
+
 		std::string msg = "";
 		Player * player = handler->GetSession()->GetPlayer();
 
@@ -88,12 +144,10 @@ public:
 
 		if (isMuted == 1)
 		{
-			handler->PSendSysMessage("|cffFF0000You are have been barred from the world chat!|r");
+			handler->PSendSysMessage("|cffFF0000You have been barred from the world chat!|r");
 			handler->SetSentErrorMessage(true);
 			return false;
 		}
-
-		std::string nameLink = handler->playerLink(player->GetName());
 
 		switch (player->GetSession()->GetSecurity())
 		{
@@ -102,89 +156,80 @@ public:
 			{
 				msg += PLAYER_H_ICON;
 				msg += PLAYER_H_PREFIX;
-				msg += nameLink;
+				msg += GetNameLink(player);
 				msg += PLAYER_H_SUFFIX;
 			}
 			else
 			{
 				msg += PLAYER_A_ICON;
 				msg += PLAYER_A_PREFIX;
-				msg += nameLink;
+				msg += GetNameLink(player);
 				msg += PLAYER_A_SUFFIX;
 			}
 			break;
 		case SEC_MODERATOR:
 			msg += COMMUNITYMANAGER_ICON;
 			msg += COMMUNITYMANAGER_PREFIX;
-			msg += nameLink;
+			msg += GetNameLink(player);
 			msg += COMMUNITYMANAGER_SUFFIX;
 			break;
 		case SEC_GAMEMASTER:
 			msg += BUILDER_ICON;
 			msg += BUILDER_PREFIX;
-			msg += nameLink;
+			msg += GetNameLink(player);
 			msg += BUILDER_SUFFIX;
 			break;
 		case SEC_ADMINISTRATOR:
 			msg += DUNGEONMASTER_ICON;
 			msg += DUNGEONMASTER_PREFIX;
-			msg += nameLink;
+			msg += GetNameLink(player);
 			msg += DUNGEONMASTER_SUFFIX;
 			break;
 		case SEC_STAFFMEMBER:
 			msg += ARCHITECT_ICON;
 			msg += ARCHITECT_PREFIX;
-			msg += nameLink;
+			msg += GetNameLink(player);
 			msg += ARCHITECT_SUFFIX;
 			break;
 		case SEC_EVENTMASTER:
 			msg += EVENTMASTER_ICON;
 			msg += EVENTMASTER_PREFIX;
-			msg += nameLink;
+			msg += GetNameLink(player);
 			msg += EVENTMASTER_SUFFIX;
 			break;
 		case SEC_LOREMASTER:
 			msg += LOREMASTER_ICON;
 			msg += LOREMASTER_PREFIX;
-			msg += nameLink;
+			msg += GetNameLink(player);
 			msg += LOREMASTER_SUFFIX;
 			break;
 		case SEC_COMMUNITYREPRESENTATIVE:
 			msg += COMMUNITYREPRESENTATIVE_ICON;
 			msg += COMMUNITYREPRESENTATIVE_PREFIX;
-			msg += nameLink;
+			msg += GetNameLink(player);
 			msg += COMMUNITYREPRESENTATIVE_SUFFIX;
 			break;
 		case SEC_COUNCILMEMBER:
 			msg += COUNCILMEMBER_ICON;
 			msg += COUNCILMEMBER_PREFIX;
-			msg += nameLink;
+			msg += GetNameLink(player);
 			msg += COUNCILMEMBER_SUFFIX;
 			break;
 		case SEC_HEADDEVELOPER:
 			msg += HEADDEVELOPER_ICON;
 			msg += HEADDEVELOPER_PREFIX;
-			msg += nameLink;
+			msg += GetNameLink(player);
 			msg += HEADDEVELOPER_SUFFIX;
 			break;
 		case SEC_CONSOLE:
 			msg += "|cfffa9900[ROOT] ";
-			msg += nameLink;
+			msg += GetNameLink(player);
 			msg += " |cFFFFFFF0 : |cFF66FFFF";
 			break;
 
 		}
 
-		if (!args)
-		{
-			handler->PSendSysMessage("|cffFF0000You can not send blank messages!|r");
-			handler->SetSentErrorMessage(true);
-			return false;
-		}
-
-		msg += args;
-
-		sWorld->SendWorldMessage(SERVER_MSG_STRING, msg.c_str(), 0);
+		sWorld->SendWorldChat(LANG_CHAT_COLOR, msg.c_str(), args);
 
 		return true;
 	}
