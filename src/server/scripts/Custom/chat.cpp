@@ -184,7 +184,7 @@ public:
 
 		msg += args;
 
-		sWorld->SendServerMessage(SERVER_MSG_STRING, msg.c_str(), 0);
+		sWorld->SendWorldMessage(SERVER_MSG_STRING, msg.c_str(), 0);
 
 		return true;
 	}

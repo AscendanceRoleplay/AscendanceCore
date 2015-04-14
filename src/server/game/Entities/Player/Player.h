@@ -909,7 +909,7 @@ enum CommandNames
 {
 	TOGGLE_APPEAR = 8,
 	TOGGLE_SUMMON = 9,
-	TOGGLE_MODIFY = 10
+	TOGGLE_WORLD_CHAT = 10
 };
 
 enum PlayerDelayedOperations
@@ -1342,7 +1342,7 @@ class Player : public Unit, public GridObject<Player>
 		//Toggle Command Values
 		bool m_toggleAppear;
 		bool m_toggleSummon;
-		bool m_toggleModify;
+		bool m_toggleWorldChat;
 
         // Played Time Stuff
         time_t m_logintime;
